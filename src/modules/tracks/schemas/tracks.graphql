@@ -25,7 +25,7 @@ type Query {
 }
 
 type Mutation {
-    createTrack(track: NoIdTrack): String
-    deleteTrack(id: ID): String
-    updateTrack(id: ID, track: NoIdTrack): String
+    createTrack(track: NoIdTrack): Track
+    deleteTrack(id: ID): DeletedElement
+    updateTrack(id: ID, track: NoIdTrack): Track
 }
