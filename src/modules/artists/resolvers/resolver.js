@@ -1,49 +1,40 @@
 import "dotenv/config";
-import { sendRequest } from "../../../sendRequest.js";
+import { checkAuth } from "../../../checkAuthorization.js";
+import { deepUpdateProperties } from "../../../deepObjectCheckers.js";
+import { sendRequest, sendRequestWithParsing } from "../../../sendRequest.js";
 import { UserInputError, ForbiddenError } from "apollo-server";
-import { checkObjectForId, getObjectForId } from "../../../checkObjectExisting.js";
+import { checkObjectForId, getObjectForId, testObjectExisting } from "../../../checkObjectExisting.js";
 import { jwt } from "../../users/resolvers/resolver.js"
 const url = process.env.ARTISTS_URL;
 export const resolver = {
     Query: {
         artists: async () => {
-            let artists = null;
+            let answer = null;
             try {
-                const answer = JSON.parse(await sendRequest(`${url}?limit=0`));
-                const artistsBody = JSON.parse(await sendRequest(`${url}?limit=${answer.total}`));
-                artists = artistsBody.items;
+                answer = await sendRequestWithParsing(`${url}?limit=0`);
+                answer = (await sendRequestWithParsing(`${url}?limit=${answer.total}`)).items;
             } catch(err) {
                 console.log(err);
             }
-            for (let artist of artists) {
-                artist.bands = artist.bandsIds;
-                const newBands = await getObjectForId(process.env.BANDS_URL, 
-                    artist.bands, [[process.env.GENRES_URL, "genres"]]);
-                for (let i = 0; i < artist.bands.length; ++i) {
-                    artist.bands[i] = newBands[i];
-                }
+            for (let el of answer) {
+                await deepUpdateProperties(el, "bands", process.env.BANDS_URL, [[process.env.GENRES_URL, "genres"]]);
             }
-            return artists;
+            return answer;
         },
         artist: async (obj, args) => {
-            let artist = null;
+            let answer = null;
             try {
-                const answer = await sendRequest(`${url}${args.id}`, "GET");
-                artist = JSON.parse(answer);
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "GET");
             } catch(err) {
                 console.log(err);
             }
-            artist.bands = artist.bandsIds;
-            const newBands = await getObjectForId(process.env.BANDS_URL, artist.bands,
-                [[process.env.GENRES_URL, "genres"]]);
-            for (let i = 0; i < artist.bands.length; ++i) {
-                artist.bands[i] = newBands[i];
-            }
-            return artist;
+            await deepUpdateProperties(answer, "bands", process.env.BANDS_URL, [[process.env.GENRES_URL, "genres"]]);
+            return answer;
         },
     },
     Mutation: {
-        createArtist: async (obj, args) => {
+        createArtist: async (obj, args, context) => {
+            await checkAuth(context.token);
             let answer = null;
             const body = {
                 firstName: args.artist.firstName,
@@ -56,37 +47,33 @@ export const resolver = {
                 instruments: args.artist.instruments,
             };
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": context.token,
             };
-            if(!(await checkObjectForId(process.env.BANDS_URL, body.bandsIds))) {
-                throw new UserInputError("Invalid argument value", {
-                    argumentsName: "id",
-                });
-            }
+            await testObjectExisting(process.env.BANDS_URL, body.bandsIds);
             try {
-                console.log(body);
-                answer = JSON.parse(await sendRequest(`${url}`, "POST", body, headers));
+                answer = await sendRequestWithParsing(`${url}`, "POST", body, headers);
+                await deepUpdateProperties(answer, "bands", process.env.BANDS_URL, [[process.env.GENRES_URL, "genres"]]);
             } catch(err) {
                 console.log(err);
             }
-            if(answer.statusCode === 403) {
-                throw new ForbiddenError(answer.message);
-            }
-            return "";
+            return answer;
         },
-        deleteArtist: (obj, args) => {
+        deleteArtist: async (obj, args, context) => {
+            await checkAuth(context.token);
+            let answer = null;
             const body = {};
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": context.token,
             };
             try {
-                const answer = sendRequest(`${url}${args.id}`, "DELETE", body, headers);
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "DELETE", body, headers);
             } catch(err) {
                 console.log(err);
             }
-            return "";
+            return answer;
         },
-        updateArtist: async (obj, args) => {
+        updateArtist: async (obj, args, context) => {
+            await checkAuth(context.token);
             let answer = null;
             const body = {
                 firstName: args.artist.firstName,
@@ -99,23 +86,16 @@ export const resolver = {
                 instruments: args.artist.instruments,
             };
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": context.token,
             };
-            if(!(await checkObjectForId(process.env.BANDS_URL, body.bandsIds))) {
-                throw new UserInputError("Invalid argument value", {
-                    argumentsName: "id",
-                });
-            }
+            await testObjectExisting(process.env.BANDS_URL, body.bandsIds);
             try {
-                console.log(body);
-                answer = JSON.parse(await sendRequest(`${url}${args.id}`, "PUT", body, headers));
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "PUT", body, headers);
+                await deepUpdateProperties(answer, "bands", process.env.BANDS_URL, [[process.env.GENRES_URL, "genres"]]);
             } catch(err) {
                 console.log(err);
             }
-            if(answer.statusCode === 403) {
-                throw new ForbiddenError(answer.message);
-            }
-            return "";
+            return answer;
         },
     },
 };

@@ -1,22 +1,22 @@
 type Artist {
     _id: ID!
-    firstName: String
-    secondName: String
+    firstName: String!
+    secondName: String!
     middleName: String
     birthDate: String
     birthPlace: String
-    country: String
+    country: String!
     bands: [Band]
     instruments: [String]
 }
 
 input NoIdArtist {
-    firstName: String
-    secondName: String
+    firstName: String!
+    secondName: String!
     middleName: String
     birthDate: String
     birthPlace: String
-    country: String
+    country: String!
     bands: [String]
     instruments: [String]
 }
@@ -27,7 +27,7 @@ type Query {
 }
 
 type Mutation {
-    createArtist(artist: NoIdArtist): String
-    deleteArtist(id: ID): String
-    updateArtist(id: ID, artist: NoIdArtist): String
+    createArtist(artist: NoIdArtist): Artist
+    deleteArtist(id: ID): DeletedElement
+    updateArtist(id: ID, artist: NoIdArtist): Artist
 }

@@ -48,6 +48,7 @@ export const resolver = {
             await testObjectExisting(process.env.GENRES_URL, body.genresIds);
             try {
                 answer = await sendRequestWithParsing(`${url}`, "POST", body, headers);
+                await deepUpdateProperties(answer, "genres", process.env.GENRES_URL);
             } catch(err) {
                 console.log(err);
             }
@@ -83,6 +84,7 @@ export const resolver = {
             await testObjectExisting(process.env.GENRES_URL, body.genresIds);
             try {
                 answer = await sendRequestWithParsing(`${url}${args.id}`, "PUT", body, headers);
+                await deepUpdateProperties(answer, "genres", process.env.GENRES_URL);
             } catch(err) {
                 console.log(err);
             }
