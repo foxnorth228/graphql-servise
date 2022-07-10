@@ -17,6 +17,9 @@ const server = new ApolloServer({
     resolvers,
     csrfPrevention: false,
     cache: 'bounded',
+    context: ({req}) => ({
+        token: req.headers.authorization || 'no',
+    }),
 });
   
 server.listen().then(({ url }) => {  

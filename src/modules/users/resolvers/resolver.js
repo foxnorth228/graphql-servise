@@ -25,8 +25,9 @@ export const resolver = {
             }
             return args.name; 
         },
-        login: async (obj, args) => { 
+        login: async (obj, args, context) => { 
             console.log(obj, args); 
+            console.log("context", context.token)
             try {
                 const body = {
                     password: args.password,

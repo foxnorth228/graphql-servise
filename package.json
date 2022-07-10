@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:servise": "node src/main.js",
+    "start:service": "node src/main.js",
     "postinstall": "run-s install:artists install:genres install:bands install:tracks install:tracks install:users install:favourites install:albums",
     "install:artists": "cd src/modules/artists/servises && npm i",
     "install:genres": "cd src/modules/genres/servises && npm i",

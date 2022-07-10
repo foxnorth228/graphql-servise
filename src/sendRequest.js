@@ -1,4 +1,5 @@
 import { request } from "http";
+import { BAD_USER_INPUT } from "apollo-server";
 export async function sendRequest(path, method="GET", body={}, headers = {}) {
     return new Promise((resolve, reject) => {
         const postData = JSON.stringify(body);
@@ -40,4 +41,14 @@ export async function sendRequest(path, method="GET", body={}, headers = {}) {
         }
         req.end();
     });
+}
+
+export async function sendRequestWithParsing(path, method="GET", body={}, headers = {}) {
+    const answer = JSON.parse(await sendRequest(path, method, body, headers));
+    if(answer.statusCode) {
+        switch(answer.statusCode) {
+            case 400: throw new BAD_USER_INPUT("You input didn't include required fields");
+        }
+    }
+    return answer;
 }
