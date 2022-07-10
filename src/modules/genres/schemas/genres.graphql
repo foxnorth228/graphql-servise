@@ -1,6 +1,6 @@
 type Genre {
     _id: ID!
-    name: String
+    name: String!
     description: String
     country: String
     year: Int
@@ -12,7 +12,7 @@ type DeletedElement {
 }
 
 input NoIdGenre {
-    name: String
+    name: String!
     description: String
     country: String
     year: Int
@@ -26,5 +26,5 @@ type Query {
 type Mutation {
     createGenre(genre: NoIdGenre): Genre
     deleteGenre(id: ID): DeletedElement
-    updateGenre(id: ID, genre: NoIdGenre): String
+    updateGenre(id: ID, genre: NoIdGenre): Genre
 }

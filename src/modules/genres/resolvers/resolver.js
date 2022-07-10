@@ -7,9 +7,8 @@ export const resolver = {
         genres: async () => {
             let genres = null;
             try {
-                const answer = JSON.parse(await sendRequest(`${url}?limit=0`));
-                const genresBody = JSON.parse(await sendRequest(`${url}?limit=${answer.total}`));
-                genres = genresBody.items;
+                const answer = await sendRequestWithParsing(`${url}?limit=0`);
+                genres = (await sendRequestWithParsing(`${url}?limit=${answer.total}`)).items;
             } catch(err) {
                 console.log(err);
             }
@@ -18,10 +17,7 @@ export const resolver = {
         genre: async (obj, args) => {
             let genre = null;
             try {
-                console.log(`${url}${args.id}`);
-                const answer = await sendRequest(`${url}${args.id}`, "GET");
-                genre = JSON.parse(answer);
-                genre.year = parseInt(genre.year);
+                genre = await sendRequestWithParsing(`${url}${args.id}`, "GET");
             } catch(err) {
                 console.log(err);
             }
@@ -42,8 +38,7 @@ export const resolver = {
                 "authorization": `${context.token}`,
             };
             try {
-                console.log(body);
-                answer = JSON.parse(await sendRequest(`${url}`, "POST", body, headers));
+                answer = await sendRequestWithParsing(`${url}`, "POST", body, headers);
             } catch(err) {
                 console.log(err);
             }
@@ -63,8 +58,9 @@ export const resolver = {
             }
             return answer;
         },
-        updateGenre: (obj, args, context) => {
+        updateGenre: async (obj, args, context) => {
             checkAuth(context);
+            let answer = null;
             const body = {
                 name: args.genre.name,
                 description: args.genre.description,
@@ -72,14 +68,15 @@ export const resolver = {
                 year: args.genre.year,
             };
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": `${context.token}`,
             };
             try {
-                const answer = sendRequest(`${url}${args.id}`, "PUT", body, headers);
+                console.log(body);
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "PUT", body, headers);
             } catch(err) {
                 console.log(err);
             }
-            return "";
+            return answer;
         },
     },
 };
