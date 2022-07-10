@@ -1,20 +1,20 @@
 type Album {
     _id: ID!
-    name: String
+    name: String!
     released: Int
     artists: [Artist]
     bands: [Band]
-    tracks: [Track]
+    track: [Track]
     genres: [Genre]
     image: String
 }
 
 input NoIdAlbum {
-    name: String
+    name: String!
     released: Int
     artists: [String]
     bands: [String]
-    tracks: [String]
+    track: [String]
     genres: [String]
     image: String
 }
@@ -25,7 +25,7 @@ type Query {
 }
 
 type Mutation {
-    createAlbum(album: NoIdAlbum): String
-    deleteAlbum(id: ID): String
-    updateAlbum(id: ID, album: NoIdAlbum): String
+    createAlbum(album: NoIdAlbum): Album
+    deleteAlbum(id: ID): DeletedElement
+    updateAlbum(id: ID, album: NoIdAlbum): Album
 }
