@@ -1,0 +1,15 @@
+type Book {
+    title: String
+    author: String
+}
+
+type Query {
+    jwt: String
+    user: String
+}
+
+type Mutation {
+    register(firstName: String, lastName: String, password: String, email: String!): String
+    login(email: String, password: String): String
+    verify: String
+}
