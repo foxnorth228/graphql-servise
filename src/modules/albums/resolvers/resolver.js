@@ -38,7 +38,6 @@ export const resolver = {
             } catch(err) {
                 console.log(err);
             }
-            console.log(answer);
             await deepUpdateProperties(answer, "track", process.env.TRACKS_URL, [[process.env.ARTISTS_URL, "artists"], [process.env.BANDS_URL, "bands"],
                     [process.env.GENRES_URL, "genres"]]);
             await deepUpdateProperties(answer, "artists", process.env.ARTISTS_URL, [[process.env.BANDS_URL, "bands"], [process.env.GENRES_URL, "genres"]]);

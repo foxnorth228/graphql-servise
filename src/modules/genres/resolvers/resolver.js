@@ -71,7 +71,6 @@ export const resolver = {
                 "authorization": `${context.token}`,
             };
             try {
-                console.log(body);
                 answer = await sendRequestWithParsing(`${url}${args.id}`, "PUT", body, headers);
             } catch(err) {
                 console.log(err);

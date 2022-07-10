@@ -15,7 +15,6 @@ export const resolver = {
             };
             try {
                 answer = await sendRequest(`${url}`, "GET", {}, headers);
-                console.log(answer);
             } catch(err) {
                 console.log(err);
             }

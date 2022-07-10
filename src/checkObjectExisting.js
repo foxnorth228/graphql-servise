@@ -7,7 +7,7 @@ export async function checkObjectForId(url, ids) {
             continue;
         }
         let body = await sendRequest(`${url}${id}`);
-        console.log(`body - ${body}`);
+        //console.log(`body - ${body}`);
         body = JSON.parse(body);
         if(body.statusCode) {
             answer = false;
@@ -19,7 +19,7 @@ export async function checkObjectForId(url, ids) {
 
 export async function getObjectForId(url, ids, recursiveProperty=[]) {
     let answer = [];
-    console.log(ids);
+    //console.log(ids);
     for (let id of ids) {
         if(id === "") {
             continue;

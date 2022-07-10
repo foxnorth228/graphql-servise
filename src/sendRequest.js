@@ -7,7 +7,7 @@ export async function sendRequest(path, method="GET", body={}, headers = {}) {
         if(method !== "GET" || method !== "DELETE") {
             length = Buffer.byteLength(postData);
         }
-        console.log(postData);
+        //console.log(postData);
         const options = {
             method: method,
             headers: {
@@ -17,15 +17,15 @@ export async function sendRequest(path, method="GET", body={}, headers = {}) {
         };
         const req = request(path, options, (res) => {
             let body = "";
-            console.log(`STATUS: ${res.statusCode}`);
-            console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+            //console.log(`STATUS: ${res.statusCode}`);
+            //console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
             res.setEncoding('utf8');
             res.on('data', (chunk) => {
-              console.log(`BODY: ${chunk}`);
+              //console.log(`BODY: ${chunk}`);
               body += chunk;
             });
             res.on('end', () => {
-                console.log('No more data in response.')
+                //console.log('No more data in response.')
                 resolve(body);
             });
         });
