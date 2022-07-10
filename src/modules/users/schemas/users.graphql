@@ -1,15 +1,24 @@
-type Book {
-    title: String
-    author: String
+type User {
+    _id: ID!
+    firstName: String!
+    lastName: String!
+    password: String!
+    email: String!
+}
+
+input NoIdUser {
+    firstName: String!
+    lastName: String!
+    password: String!
+    email: String!
 }
 
 type Query {
     jwt: String
-    user: String
+    user(id: ID): User
 }
 
 type Mutation {
-    register(firstName: String, lastName: String, password: String, email: String!): String
+    register(user: NoIdUser): User
     login(email: String, password: String): String
-    verify: String
 }
