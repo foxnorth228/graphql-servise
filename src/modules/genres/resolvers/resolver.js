@@ -26,7 +26,7 @@ export const resolver = {
     },
     Mutation: {
         createGenre: async (obj, args, context) => {
-            checkAuth(context);
+            await checkAuth(context);
             let answer = null;
             const body = {
                 name: args.genre.name,
@@ -45,7 +45,7 @@ export const resolver = {
             return answer;
         },
         deleteGenre: async (obj, args, context) => {
-            checkAuth(context);
+            await checkAuth(context);
             let answer = null;
             const body = {};
             const headers = {
@@ -59,7 +59,7 @@ export const resolver = {
             return answer;
         },
         updateGenre: async (obj, args, context) => {
-            checkAuth(context);
+            await checkAuth(context);
             let answer = null;
             const body = {
                 name: args.genre.name,

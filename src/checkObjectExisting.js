@@ -45,3 +45,11 @@ export async function getObjectForId(url, ids, recursiveProperty=[]) {
     }
     return answer;
 }
+
+export async function testObjectExisting(url, object) {
+    if(!(await checkObjectForId(url, object))) {
+        throw new UserInputError("Invalid argument value", {
+            argumentsName: "id",
+        });
+    }
+}

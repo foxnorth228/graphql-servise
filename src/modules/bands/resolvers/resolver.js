@@ -1,47 +1,39 @@
 import "dotenv/config";
-import { sendRequest } from "../../../sendRequest.js";
+import { checkAuth } from "../../../checkAuthorization.js";
+import { deepUpdateProperties } from "../../../deepObjectCheckers.js";
+import { sendRequest, sendRequestWithParsing } from "../../../sendRequest.js";
 import { UserInputError, ForbiddenError } from "apollo-server";
-import { checkObjectForId, getObjectForId } from "../../../checkObjectExisting.js";
-import { jwt } from "../../users/resolvers/resolver.js"
+import { checkObjectForId, getObjectForId, testObjectExisting } from "../../../checkObjectExisting.js";
 const url = process.env.BANDS_URL;
 export const resolver = {
     Query: {
         bands: async () => {
-            let bands = null;
+            let answer = null;
             try {
-                const answer = JSON.parse(await sendRequest(`${url}?limit=0`));
-                const bandsBody = JSON.parse(await sendRequest(`${url}?limit=${answer.total}`));
-                bands = bandsBody.items;
+                answer = await sendRequestWithParsing(`${url}?limit=0`);
+                answer = (await sendRequestWithParsing(`${url}?limit=${answer.total}`)).items;
             } catch(err) {
                 console.log(err);
             }
-            for (let band of bands) {
-                band.genres = band.genresIds;
-                const newGenres = await getObjectForId(process.env.GENRES_URL, band.genres);
-                for (let i = 0; i < band.genres.length; ++i) {
-                    band.genres[i] = newGenres[i];
-                }
+            for (let el of answer) {
+                await deepUpdateProperties(el, "genres", process.env.GENRES_URL);
             }
-            return bands;
+            return answer;
         },
         band: async (obj, args) => {
-            let band = null;
+            let answer = null;
             try {
-                const answer = await sendRequest(`${url}${args.id}`, "GET");
-                band = JSON.parse(answer);
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "GET");
             } catch(err) {
                 console.log(err);
             }
-            band.genres = band.genresIds;
-            const newGenres = await getObjectForId(process.env.GENRES_URL, band.genres);
-            for (let i = 0; i < band.genres.length; ++i) {
-                band.genres[i] = newGenres[i];
-            }
-            return band;
+            await deepUpdateProperties(answer, "genres", process.env.GENRES_URL);
+            return answer;
         },
     },
     Mutation: {
-        createBand: async (obj, args) => {
+        createBand: async (obj, args, context) => {
+            await checkAuth(context.token);
             let answer = null;
             const body = {
                 name: args.band.name,
@@ -51,37 +43,32 @@ export const resolver = {
                 genresIds: args.band.genres
             };
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": `${context.token}`,
             };
-            if(!(await checkObjectForId(process.env.GENRES_URL, body.genresIds))) {
-                throw new UserInputError("Invalid argument value", {
-                    argumentsName: "id",
-                });
-            }
+            await testObjectExisting(process.env.GENRES_URL, body.genresIds);
             try {
-                console.log(body);
-                answer = JSON.parse(await sendRequest(`${url}`, "POST", body, headers));
+                answer = await sendRequestWithParsing(`${url}`, "POST", body, headers);
             } catch(err) {
                 console.log(err);
             }
-            if(answer.statusCode === 403) {
-                throw new ForbiddenError(answer.message);
-            }
-            return "";
+            return answer;
         },
-        deleteBand: (obj, args) => {
+        deleteBand: async (obj, args, context) => {
+            await checkAuth(context.token);
+            let answer = null;
             const body = {};
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": context.token,
             };
             try {
-                const answer = sendRequest(`${url}${args.id}`, "DELETE", body, headers);
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "DELETE", body, headers);
             } catch(err) {
                 console.log(err);
             }
-            return "";
+            return answer;
         },
-        updateBand: async (obj, args) => {
+        updateBand: async (obj, args, context) => {
+            await checkAuth(context.token);
             let answer = null;
             const body = {
                 name: args.band.name,
@@ -91,22 +78,15 @@ export const resolver = {
                 genresIds: args.band.genres
             };
             const headers = {
-                "authorization": `${jwt}`,
+                "authorization": context.token,
             };
-            if(!(await checkObjectForId(process.env.GENRES_URL, body.genresIds))) {
-                throw new UserInputError("Invalid argument value", {
-                    argumentsName: "id",
-                });
-            }
+            await testObjectExisting(process.env.GENRES_URL, body.genresIds);
             try {
-                answer = await sendRequest(`${url}${args.id}`, "PUT", body, headers);
+                answer = await sendRequestWithParsing(`${url}${args.id}`, "PUT", body, headers);
             } catch(err) {
                 console.log(err);
             }
-            if(answer.statusCode === 403) {
-                throw new ForbiddenError(answer.message);
-            }
-            return "";
+            return answer;
         },
     },
 };

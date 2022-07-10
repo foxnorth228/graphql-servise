@@ -5,7 +5,7 @@ export let jwt = null;
 export const resolver = {
     Query: {
         jwt: () => jwt,
-        user: async (obj, args, context) => {
+        user: async (obj, args) => {
             let answer = null;
             try {
                 answer = await sendRequestWithParsing(`${url}${args.id}`);

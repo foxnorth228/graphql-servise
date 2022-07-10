@@ -12,7 +12,7 @@ input IMember {
 
 type Band {
     _id: ID!
-    name: String
+    name: String!
     origin: String
     members: [Member]
     website: String
@@ -20,7 +20,7 @@ type Band {
 }
 
 input NoIdBand {
-    name: String
+    name: String!
     origin: String
     members: [IMember]
     website: String
@@ -33,7 +33,7 @@ type Query {
 }
 
 type Mutation {
-    createBand(band: NoIdBand): String
-    deleteBand(id: ID): String
-    updateBand(id: ID, band: NoIdBand): String
+    createBand(band: NoIdBand): Band
+    deleteBand(id: ID): DeletedElement
+    updateBand(id: ID, band: NoIdBand): Band
 }
