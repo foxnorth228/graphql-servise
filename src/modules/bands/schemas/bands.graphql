@@ -1,0 +1,39 @@
+type Member {
+    artist: String
+    instrument: String
+    years: Int
+}
+
+input IMember {
+    artist: String
+    instrument: String
+    years: Int
+}
+
+type Band {
+    _id: ID!
+    name: String!
+    origin: String
+    members: [Member]
+    website: String
+    genres: [Genre]
+}
+
+input NoIdBand {
+    name: String!
+    origin: String
+    members: [IMember]
+    website: String
+    genres: [String]
+}
+
+type Query {
+    band(id: String): Band
+    bands: [Band]
+}
+
+type Mutation {
+    createBand(band: NoIdBand): Band
+    deleteBand(id: ID): DeletedElement
+    updateBand(id: ID, band: NoIdBand): Band
+}
